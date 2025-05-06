@@ -1,3 +1,3 @@
 ## License
 
-See [LICENSE]("https://github.com/phatjng/ensure/blob/main/LICENSE") for more information.
+See [LICENSE](https://github.com/phatjng/ensure/blob/main/LICENSE) for more information.
