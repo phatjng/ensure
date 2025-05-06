@@ -1,0 +1,54 @@
+{
+  "name": "@phatjng/ensure",
+  "version": "0.0.1",
+  "description": "A helper for reliable async operations with retries, timeouts, and error handling.",
+  "author": "Jamie Ng <hi@jamieng.io>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/phatjng/ensure.git"
+  },
+  "homepage": "https://github.com/phatjng/ensure",
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "type": "module",
+  "types": "./dist/ensure.d.ts",
+  "main": "./dist/ensure.js",
+  "exports": {
+    ".": {
+      "module-sync": {
+        "types": "./dist/ensure.d.ts",
+        "default": "./dist/ensure.js"
+      },
+      "import": {
+        "types": "./dist/ensure.d.ts",
+        "default": "./dist/ensure.js"
+      },
+      "require": {
+        "types": "./dist/ensure.d.ts",
+        "default": "./dist/ensure.cjs"
+      },
+      "default": {
+        "types": "./dist/ensure.d.ts",
+        "default": "./dist/ensure.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsup",
+    "prepare": "pnpm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@10.10.0"
+}
