@@ -14,6 +14,7 @@ export interface EnsureOptions {
   exponentialBackoff?: boolean;
   timeout?: number;
   onRetry?: (attempt: number, error: unknown) => void;
+  onError?: (error: unknown) => Promise<void>;
 }
 
 export type EnsureSuccess<T> = {

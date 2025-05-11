@@ -7,7 +7,7 @@ import type {
 } from "./types";
 
 export function createEnsure(options: CreateEnsureOptions = {}) {
-  const { environment, onError } = options;
+  const { environment, onError: onErrorGlobal } = options;
 
   async function ensure<T>(
     fn: () => Promise<T>,
@@ -20,10 +20,12 @@ export function createEnsure(options: CreateEnsureOptions = {}) {
       exponentialBackoff = false,
       timeout,
       onRetry = () => {},
+      onError: onErrorLocal = undefined,
     } = options;
 
     let retryCount = 0;
     let lastError: unknown;
+    const onError = onErrorLocal ?? onErrorGlobal;
 
     const env = environment || process.env.NODE_ENV;
 
