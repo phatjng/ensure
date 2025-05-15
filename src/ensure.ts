@@ -7,7 +7,11 @@ import type {
 } from "./types";
 
 export function createEnsure(options: CreateEnsureOptions = {}) {
-  const { environment, onError: onErrorGlobal } = options;
+  const {
+    environment,
+    onSuccess: onSuccessGlobal,
+    onError: onErrorGlobal,
+  } = options;
 
   async function ensure<T>(
     fn: () => Promise<T>,
@@ -20,11 +24,14 @@ export function createEnsure(options: CreateEnsureOptions = {}) {
       exponentialBackoff = false,
       timeout,
       onRetry = () => {},
+      onSuccess: onSuccessLocal = undefined,
       onError: onErrorLocal = undefined,
     } = options;
 
     let retryCount = 0;
     let lastError: unknown;
+
+    const onSuccess = onSuccessLocal ?? onSuccessGlobal;
     const onError = onErrorLocal ?? onErrorGlobal;
 
     const env = environment || process.env.NODE_ENV;
@@ -53,6 +60,15 @@ export function createEnsure(options: CreateEnsureOptions = {}) {
     for (let attempt = 0; attempt <= retry; attempt++) {
       try {
         const data = await executeWithTimeout();
+
+        // Call `onSuccess` handler if provided
+        if (onSuccess) {
+          onSuccess({ tag, data, retryCount }).catch((error) => {
+            if (env !== "production") {
+              console.error("Ensure: error in 'onSuccess' handler:", error);
+            }
+          });
+        }
 
         return {
           data,

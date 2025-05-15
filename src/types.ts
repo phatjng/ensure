@@ -1,5 +1,10 @@
 export interface CreateEnsureOptions {
   environment?: "development" | "production" | "test";
+  onSuccess?: (context: {
+    tag?: string;
+    data: unknown;
+    retryCount: number;
+  }) => Promise<void>;
   onError?: (context: {
     tag?: string;
     error: unknown;
@@ -14,6 +19,7 @@ export interface EnsureOptions {
   exponentialBackoff?: boolean;
   timeout?: number;
   onRetry?: (attempt: number, error: unknown) => void;
+  onSuccess?: () => Promise<void>;
   onError?: (error: unknown) => Promise<void>;
 }
 

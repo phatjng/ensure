@@ -1,6 +1,6 @@
 {
   "name": "@phatjng/ensure",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A helper for reliable async operations with retries, timeouts, and error handling.",
   "author": "Jamie Ng <hi@jamieng.io>",
   "license": "MIT",
