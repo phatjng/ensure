@@ -1,6 +1,7 @@
 import type {
   CreateEnsureOptions,
   EnsureError,
+  EnsureErrorData,
   EnsureOptions,
   EnsureResult,
   EnsureSuccess,
@@ -12,6 +13,32 @@ export function createEnsure(options: CreateEnsureOptions = {}) {
     onSuccess: onSuccessGlobal,
     onError: onErrorGlobal,
   } = options;
+
+  function createStructuredError(
+    cause: unknown,
+    tag?: string,
+    retryCount: number = 0,
+    operation?: string
+  ): EnsureErrorData {
+    let message: string;
+    
+    if (cause instanceof Error) {
+      message = cause.message;
+    } else if (typeof cause === "string") {
+      message = cause;
+    } else {
+      message = "An unknown error occurred";
+    }
+
+    return {
+      cause,
+      message,
+      tag,
+      retryCount,
+      timestamp: Date.now(),
+      operation,
+    };
+  }
 
   async function ensure<T>(
     fn: () => Promise<T>,
@@ -30,6 +57,7 @@ export function createEnsure(options: CreateEnsureOptions = {}) {
 
     let retryCount = 0;
     let lastError: unknown;
+    let structuredError: EnsureErrorData | undefined;
 
     const onSuccess = onSuccessLocal ?? onSuccessGlobal;
     const onError = onErrorLocal ?? onErrorGlobal;
@@ -81,6 +109,7 @@ export function createEnsure(options: CreateEnsureOptions = {}) {
         }
 
         lastError = error;
+        structuredError = createStructuredError(error, tag, retryCount);
 
         if (attempt < retry) {
           retryCount++;
@@ -98,9 +127,21 @@ export function createEnsure(options: CreateEnsureOptions = {}) {
       }
     }
 
-    // Call `onError` handler if provided
-    if (onError) {
-      onError({ tag, error: lastError, retryCount }).catch((error) => {
+    // Create final structured error with correct retry count
+    const finalStructuredError = createStructuredError(lastError, tag, retryCount);
+
+    // Call `onError` handler if provided (global handler)
+    if (onErrorGlobal) {
+      onErrorGlobal({ tag, error: finalStructuredError, retryCount }).catch((error) => {
+        if (env !== "production") {
+          console.error("Ensure: error in 'onError' handler:", error);
+        }
+      });
+    }
+
+    // Call local onError handler if provided
+    if (onErrorLocal) {
+      onErrorLocal(finalStructuredError).catch((error) => {
         if (env !== "production") {
           console.error("Ensure: error in 'onError' handler:", error);
         }
@@ -109,7 +150,7 @@ export function createEnsure(options: CreateEnsureOptions = {}) {
 
     return {
       data: undefined,
-      error: lastError,
+      error: finalStructuredError,
       retryCount,
     } as EnsureError;
   }

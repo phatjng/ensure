@@ -7,7 +7,7 @@ export interface CreateEnsureOptions {
   }) => Promise<void>;
   onError?: (context: {
     tag?: string;
-    error: unknown;
+    error: EnsureErrorData;
     retryCount: number;
   }) => Promise<void>;
 }
@@ -20,7 +20,16 @@ export interface EnsureOptions {
   timeout?: number;
   onRetry?: (attempt: number, error: unknown) => void;
   onSuccess?: () => Promise<void>;
-  onError?: (error: unknown) => Promise<void>;
+  onError?: (error: EnsureErrorData) => Promise<void>;
+}
+
+export interface EnsureErrorData {
+  cause: unknown;
+  message: string;
+  tag?: string;
+  retryCount: number;
+  timestamp: number;
+  operation?: string;
 }
 
 export type EnsureSuccess<T> = {
@@ -31,7 +40,7 @@ export type EnsureSuccess<T> = {
 
 export type EnsureError = {
   data: undefined;
-  error: unknown;
+  error: EnsureErrorData;
   retryCount: number;
 };
 
